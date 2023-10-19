@@ -18,6 +18,18 @@ class ProviderSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Provider name cannot be empty")
         return data
 
+    def create(self, validated_data):
+        try:
+            return Provider.objects.create(**validated_data)
+        except IntegrityError as ex:
+            if "unique constraint" in str(ex.args):
+                raise serializers.ValidationError(
+                    "Provider with this name already exists"
+                ) from ex
+        except Exception as ef:
+            logger.error("An error occurred: %s", ef, exc_info=True)
+            raise serializers.ValidationError("Oops! Something went wrong") from ef
+
     def update(self, instance, validated_data):
         try:
             with transaction.atomic():
@@ -50,44 +62,38 @@ class CurrencySerializer(serializers.ModelSerializer):
         model = Currency
         exclude = ["created_at", "updated_at", "is_deleted"]
 
+    def validate(self, data):
+        if not data.get("currency_name"):
+            raise serializers.ValidationError("Currency name cannot be empty")
+        return data
+
     def create(self, validated_data):
         try:
-            claim = Claim.objects.select_for_update().get(id=instance.pk)
-
-            for key, value in validated_data.items():
-                setattr(claim, key, value)
-            claim.save()
-            claim_approver, _ = ClaimApprover.objects.get_or_create(
-                claim=claim, approver=user, status=validated_data.get("status")
-            )
-            claim_approver.save()
-
-            logger.info(
-                f"email in api claim update began for recipient: {instance.requester.email}"
-            )
-        except IntegrityError as exc:
-            logger.error("An error occurred: %s", exc)
-            if "unique constraint" in str(exc.args):
+            return Currency.objects.create(**validated_data)
+        except IntegrityError as ex:
+            if "unique constraint" in str(ex.args):
                 raise serializers.ValidationError(
-                    "Currency name already exists"
-                ) from exc
-        except Exception as ex:
-            logger.error("An error occurred: %s", ex)
-            transaction.set_rollback(True)
-            raise serializers.ValidationError(
-                "Error encountered while updating status. Please try again"
-            ) from ex
+                    "Currency with this data already exists"
+                ) from ex
+        except Exception as ef:
+            logger.error("An error occurred: %s", ef, exc_info=True)
+            raise serializers.ValidationError("Oops! Something went wrong") from ef
+
+    def update(self, instance, validated_data):
+        try:
+            with transaction.atomic():
+                currency = Currency.objects.select_for_update().get(pk=instance.pk)
+                for key, value in validated_data.items():
+                    if hasattr(currency, key):
+                        setattr(currency, key, value)
+                currency.save()
+        except IntegrityError as ex:
+            if "unique constraint" in str(ex.args):
+                raise serializers.ValidationError(
+                    "Currency with this data already exists"
+                ) from ex
+        except Exception as ef:
+            logger.error("An error occurred: %s", ef, exc_info=True)
+            raise serializers.ValidationError("Oops! Something went wrong") from ef
+
         return instance
-
-
-class ArticleSerializer(serializers.ModelSerializer):
-    article = CurrencySerializer()
-    provider = ProviderSerializer()
-    date_created = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Article
-        fields = ["article_no", "article", "provider", "price", "date_created"]
-
-    def get_date_created(self, obj):
-        return obj.created_at.strftime("%Y-%m-%d %H:%M:%S")

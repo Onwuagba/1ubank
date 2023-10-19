@@ -5,6 +5,7 @@ from app.constant import CURRENCY_CODE
 from django.db import transaction
 from django.core.exceptions import ValidationError
 import re
+from django.db.models.functions import Upper
 
 
 def validate_price(value):
@@ -31,10 +32,19 @@ class BaseModel(models.Model):
 
 class Currency(BaseModel):
     currency_id = models.CharField(max_length=5, primary_key=True)
-    currency_name = models.CharField(max_length=9, unique=True)
+    currency_name = models.CharField(
+        max_length=9,
+        unique=True,
+    )
 
     class Meta:
         verbose_name_plural = "Currencies"
+
+        constraints = [
+            models.UniqueConstraint(
+                Upper("currency_name"), name="unique_currency_name_category"
+            )
+        ]
 
     def __str__(self) -> str:
         return str(self.currency_name)
