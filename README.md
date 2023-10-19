@@ -36,3 +36,5 @@ Rename `.env.copy` to `.env` and update with the relevant credentials
 ```
 
 Setup complete. Navigate to `http://127.0.0.1:8000/docs` to see the list of available endpoints.
+
+[![Run collection in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/7261954-cbee5ee6-6201-4ca5-a8c6-316b94bab831?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D7261954-cbee5ee6-6201-4ca5-a8c6-316b94bab831%26entityType%3Dcollection%26workspaceId%3D21eb856b-3287-46ec-951c-824c21f61034)
