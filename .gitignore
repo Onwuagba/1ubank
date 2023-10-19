@@ -1,0 +1,16 @@
+.venv
+.vscode
+__pycache__/
+*.pyc
+.idea/
+.pytest_cache
+venv
+.editorconfig
+venv/
+.env
+**/__pycache__/**
+logs/**
+migrations/
+info.log
+tests.py
+notes.txt
