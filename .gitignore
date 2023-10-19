@@ -12,6 +12,5 @@ venv/
 logs/**
 migrations/
 info.log
-tests.py
 notes.txt
 README.md

@@ -97,3 +97,30 @@ class CurrencySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Oops! Something went wrong") from ef
 
         return instance
+
+
+class ArticleSerializer(serializers.ModelSerializer):
+    article_no = serializers.IntegerField(read_only=True)
+    currency_id = serializers.CharField(
+        write_only=True
+    )  # field is unknown for GET request reason for write_only
+    provider_no = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Article
+        exclude = ["created_at", "updated_at", "is_deleted"]
+
+    def create(self, validated_data):
+        validated_data.pop("currency_id", None)
+        validated_data.pop("provider_no", None)
+
+        try:
+            return Article.objects.create(**validated_data)
+        except IntegrityError as ex:
+            if "unique constraint" in str(ex.args):
+                raise serializers.ValidationError(
+                    "Article with this id and provider already exists"
+                ) from ex
+        except Exception as ef:
+            logger.error("An error occurred: %s", ef, exc_info=True)
+            raise serializers.ValidationError("Oops! Something went wrong") from ef

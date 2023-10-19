@@ -82,9 +82,17 @@ class Article(BaseModel):
     article_no = models.IntegerField(primary_key=True, db_index=True)
     article = models.ForeignKey(Currency, on_delete=models.CASCADE)
     provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
+    # TODO: remove validator since decimalfield takes care of it
     price = models.DecimalField(
         max_digits=16, decimal_places=2, validators=[validate_price]
     )  # Here since price is independent of article. If price is tied to article, create a pivot table
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["article", "provider"], name="unique_article_provider"
+            )
+        ]
 
     def save(self, *args, **kwargs):
         if self._state.adding:
