@@ -6,6 +6,7 @@ from rest_framework.generics import (
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.filters import SearchFilter
 import logging
 from app.custom_response import CustomAPIResponse
 from app.models import Article, Currency, Provider
@@ -263,6 +264,12 @@ class ArticleView(ListCreateAPIView):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     http_method_names = ["get", "post"]
+    filter_backends = (SearchFilter,)
+    search_fields = [
+        "article__currency_id",
+        "provider__provider_no",
+        "article_no",
+    ]
 
     def get(self, request, *args):
         re_status = "failed"
