@@ -42,8 +42,6 @@ class ProviderTestCase(TestCase):
         response = self.create_provider("dola")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    # Add more test cases for other provider endpoints if needed
-
 
 class CurrencyTestCase(TestCase):
     def setUp(self):
